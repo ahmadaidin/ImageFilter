@@ -86,4 +86,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void blurImage(View view) {
+        if(bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.blurImage();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+
 }

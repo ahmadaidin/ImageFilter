@@ -230,20 +230,7 @@ public class BitmapEditor{
                 int deltaGray = newGray - oldGray;
                 int p = bitmap.getPixel(i,j);
 
-                int r = Color.red(p)+deltaGray;
-                int g = Color.green(p)+deltaGray;
-                int b = Color.blue(p)+deltaGray;
-
-                if (r<0){ r = 0;}
-                else if(r>255){ r = 255; }
-
-                if (g<0){ g = 0;}
-                else if(g>255){ g = 255; }
-
-                if (b<0){ b = 0;}
-                else if(b>255){ b = 255; }
-
-                bitmap.setPixel(i, j, Color.argb(Color.alpha(p),r,g,b));
+                bitmap.setPixel(i, j, manipulatePixel(p,deltaGray));
             }
         }
 
@@ -282,42 +269,59 @@ public class BitmapEditor{
 
         for(int i=1; i<bitmap.getHeight()-1; i++){
             for(int j=1; j<bitmap.getWidth()-1; j++){
-                int sumR = 0, sumG = 0, sumB = 0;
                 int sum = 0;
                 for (int x = -1; x<2; x++) {
                     for(int y = -1; y<2; y++) {
                         int c = grayscale.get(j+x)[i+y];
                         sum += filter[x+1][y+1]*c;
-                        //sumR += filter[x+1][y+1]*Color.red(c);
-                        //sumG += filter[x+1][y+1]*Color.green(c);
-                        //sumB += filter[x+1][y+1]*Color.blue(c);
                     }
                 }
-                /*
-                int r= sumR;
-                int g= sumG;
-                int b= sumB;
-*/
                 int oldGray = grayscale.get(j)[i];
                 int deltaGray = sum - oldGray;
                 int p = bitmap.getPixel(j,i);
-
-                int r = Color.red(p)+deltaGray;
-                int g = Color.green(p)+deltaGray;
-                int b = Color.blue(p)+deltaGray;
-
-                if (r<0){ r = 0;}
-                else if(r>255){ r = 255; }
-
-                if (g<0){ g = 0;}
-                else if(g>255){ g = 255; }
-
-                if (b<0){ b = 0;}
-                else if(b>255){ b = 255; }
-
-                bitmap.setPixel(j, i, Color.argb(Color.alpha(p),r,g,b));
+                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
             }
         }
+    }
+
+    public void blurImage(){
+        double[][] filter  = {
+                {0.0,0.2,0.0},
+                {0.2,0.2,0.2},
+                {0.0,0.2,0.0}
+        };
+
+        for(int i=1; i<bitmap.getHeight()-1; i++){
+            for(int j=1; j<bitmap.getWidth()-1; j++){
+                int sum = 0;
+                for (int x = -1; x<2; x++) {
+                    for(int y = -1; y<2; y++) {
+                        int c = grayscale.get(j+x)[i+y];
+                        sum += filter[x+1][y+1]*c;
+                    }
+                }
+                int oldGray = grayscale.get(j)[i];
+                int deltaGray = sum - oldGray;
+                int p = bitmap.getPixel(j,i);
+                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+            }
+        }
+    }
+
+    private int manipulatePixel(int pixel, int addition) {
+        int  newPixel;
+
+        int r = Color.red(pixel)+addition;
+        int g = Color.green(pixel)+addition;
+        int b = Color.blue(pixel)+addition;
+
+        r = Math.min(Math.max(0,r),255);
+        g = Math.min(Math.max(0,g),255);
+        b = Math.min(Math.max(0,b),255);
+
+        newPixel = Color.argb(Color.alpha(pixel),r,g,b);
+
+        return newPixel;
     }
 
 
