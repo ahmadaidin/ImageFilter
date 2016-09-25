@@ -1,28 +1,41 @@
 package com.example.ahmadaidin.imgfilter;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+public class MainActivity extends Activity {
     private static int RESULT_LOAD_IMG = 1;
     String imgDecodableString;
     BitmapEditor bitmapEditor;
     ImageView imgView;
     Bitmap bitmap;
+    Convolution cvl;
+    String s = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        InputStream inputStream;
+        Resources resource = getResources();
+        inputStream = resource.openRawResource(R.raw.matrix);
+        cvl = new Convolution(inputStream);
     }
 
 
@@ -62,6 +75,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void resetImage(View view) {
+        if (bitmapEditor.bitmap()!= null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.resetBitmap();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+
     public void filterImage(View view) {
         if (bitmapEditor.bitmap()!= null) {
             imgView = (ImageView) findViewById(R.id.imgView);
@@ -94,4 +115,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void detectEdge1(View view) {
+        if(bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.detectEdge1();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+
+    public void detectEdge2(View view) {
+        if(bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.detectEdge2();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+
+    public void edgeRobert(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeRobert(cvl);
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
 }

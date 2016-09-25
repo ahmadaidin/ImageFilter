@@ -1,9 +1,11 @@
 package com.example.ahmadaidin.imgfilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.view.View;
+import android.util.JsonReader;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -15,8 +17,11 @@ public class BitmapEditor{
     @SuppressWarnings("unused")
     private static final String TAG = "image.filter.BitmapEditor";
     private Bitmap bitmap;
+    private Bitmap oriBitmap;
     private ArrayList<int[]> grayscale;
+    private ArrayList<int[]> oriGrayscale;
     private int[] grayHistogram;
+    private Hashtable<Integer, Integer> convolusionMatrix;
 
     public BitmapEditor() {
 
@@ -24,18 +29,33 @@ public class BitmapEditor{
 
     public BitmapEditor(Bitmap bitmap){
         this.bitmap = Bitmap.createBitmap(bitmap);
+        this.oriBitmap = bitmap;
         setGrayscale();
+        oriGrayscale = grayscale;
         setGreylevelHistogram();
     }
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = Bitmap.createBitmap(bitmap);
+        this.oriBitmap =bitmap;
         setGrayscale();
+        oriGrayscale = grayscale;
         setGreylevelHistogram();
     }
 
     public Bitmap bitmap(){
         return bitmap;
+    }
+
+    public void resetBitmap() {
+        bitmap = Bitmap.createBitmap(oriBitmap);
+        resetGrayscale();
+    }
+
+    private void resetGrayscale() {
+        for (int i = 0; i< oriGrayscale.size(); i++) {
+            grayscale.set(i,oriGrayscale.get(i));
+        }
     }
 
     public static ArrayList<int[]> getGrayscale(Bitmap bmp) {
@@ -161,6 +181,7 @@ public class BitmapEditor{
     private void setGrayscale() {
         grayscale = getGrayscale(bitmap);
     }
+
     private void setGreylevelHistogram() {
         grayHistogram = new int[256];
         for(int i=0; i<grayHistogram.length; i++) grayHistogram[i]=0;
@@ -233,7 +254,7 @@ public class BitmapEditor{
                 bitmap.setPixel(i, j, manipulatePixel(p,deltaGray));
             }
         }
-
+        setGrayscale();
     }
 
     public void smoothImage() {
@@ -258,6 +279,7 @@ public class BitmapEditor{
                 bitmap.setPixel(i, j, Color.argb(Color.alpha(p),r,g,b));
             }
         }
+        setGrayscale();
     }
 
     public void sharpImage(){
@@ -282,6 +304,7 @@ public class BitmapEditor{
                 bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
             }
         }
+        setGrayscale();
     }
 
     public void blurImage(){
@@ -306,6 +329,76 @@ public class BitmapEditor{
                 bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
             }
         }
+        setGrayscale();
+    }
+
+    public void detectEdge1(){
+        for(int i=1; i<bitmap.getHeight()-1; i++){
+            for(int j=1; j<bitmap.getWidth()-1; j++){
+                int Opt1 = Math.abs(grayscale.get(j-1)[i-1]-grayscale.get(j+1)[i+1]);
+                int Opt2 = Math.abs(grayscale.get(j)[i-1]-grayscale.get(j)[i+1]);
+                int Opt3 = Math.abs(grayscale.get(j+1)[i-1]-grayscale.get(j-1)[i+1]);
+                int Opt4 = Math.abs(grayscale.get(j-1)[i-1]-grayscale.get(j+1)[i+1]);
+
+                int newGray = Math.max(Math.max(Math.max(Opt1,Opt2),Opt3),Opt4);
+
+                int oldGray = grayscale.get(j)[i];
+                int deltaGray = newGray - oldGray;
+                int p = bitmap.getPixel(j,i);
+                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+            }
+        }
+        setGrayscale();
+    }
+
+    public void detectEdge2(){
+        for(int i=1; i<bitmap.getHeight()-1; i++){
+            for(int j=1; j<bitmap.getWidth()-1; j++){
+                int max = 0;
+                for (int x = -1; x<2; x++) {
+                    for(int y = -1; y<2; y++) {
+                        int opt = Math.abs(grayscale.get(j)[i]-grayscale.get(j+x)[i+y]);
+                        max = Math.max(max,opt);
+                    }
+                }
+                int newGray = max;
+
+                int oldGray = grayscale.get(j)[i];
+                int deltaGray = newGray - oldGray;
+                int p = bitmap.getPixel(j,i);
+                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+            }
+        }
+        setGrayscale();
+    }
+
+    public void edgeRobert(Convolution c) {
+        ArrayList<ArrayList<Integer>> robertH;
+        ArrayList<ArrayList<Integer>> robertV;
+        try {
+            robertH = c.getMatrix("robertH");
+            robertV = c.getMatrix("robertV");
+            for(int i=1; i<bitmap.getHeight()-1; i++){
+                for(int j=1; j<bitmap.getWidth()-1; j++){
+                    int sumH = 0, sumV = 0;
+                    for (int x = -1; x<2; x++) {
+                        for(int y = -1; y<2; y++) {
+                            sumH += grayscale.get(j+x)[i+y]*robertH.get(x+1).get(y+1);
+                            sumV = grayscale.get(j+x)[i+y]*robertV.get(x+1).get(y+1);
+                        }
+                    }
+
+                    int newGray = sumH+sumV;
+                    int oldGray = grayscale.get(j)[i];
+                    int deltaGray = newGray - oldGray;
+                    int p = bitmap.getPixel(j,i);
+                    bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        setGrayscale();
     }
 
     private int manipulatePixel(int pixel, int addition) {
@@ -324,6 +417,44 @@ public class BitmapEditor{
         return newPixel;
     }
 
+    private Hashtable<String, ArrayList<ArrayList<Integer>>> readJsonStream(InputStream in) throws IOException {
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+        try {
+            return readMessages(reader);
+        } finally {
+            reader.close();
+        }
+    }
 
+    private Hashtable<String, ArrayList<ArrayList<Integer>>> readMessages(JsonReader reader) throws IOException {
+        Hashtable<String, ArrayList<ArrayList<Integer>>> messages = new Hashtable<>();
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            messages.put(name,readMatrix(reader));
+        }
+        reader.endObject();
+        return messages;
+    }
+
+    private ArrayList<ArrayList<Integer>> readMatrix(JsonReader reader) throws IOException {
+        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>();
+        reader.beginArray();
+        while(reader.hasNext()) {
+            matrix.add(readArray(reader));
+        }
+        reader.endArray();
+        return matrix;
+    }
+
+    private  ArrayList<Integer> readArray(JsonReader reader) throws  IOException {
+        ArrayList<Integer> array = new ArrayList<>();
+        reader.beginArray();
+        while(reader.hasNext()) {
+            array.add(reader.nextInt());
+        }
+        return array;
+    }
 
 }
