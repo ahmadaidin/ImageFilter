@@ -1,6 +1,7 @@
 package com.example.ahmadaidin.imgfilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.util.JsonReader;
 
 import java.io.IOException;
@@ -372,27 +373,109 @@ public class BitmapEditor{
         setGrayscale();
     }
 
-    public void edgeRobert(Convolution c) {
-        ArrayList<ArrayList<Integer>> robertH;
-        ArrayList<ArrayList<Integer>> robertV;
+    public  void robert(Convolution c) {
+        ArrayList<ArrayList<Integer>> hMatrix;
+        ArrayList<ArrayList<Integer>> vMatrix;
         try {
-            robertH = c.getMatrix("robertH");
-            robertV = c.getMatrix("robertV");
-            for(int i=1; i<bitmap.getHeight()-1; i++){
-                for(int j=1; j<bitmap.getWidth()-1; j++){
+            hMatrix = c.getMatrix("Robert");
+            vMatrix = MatrixOperator.rotateLeft(hMatrix);
+
+            for(int i=0; i<bitmap.getHeight()-1; i++){
+                for(int j=0; j<bitmap.getWidth()-1; j++){
                     int sumH = 0, sumV = 0;
-                    for (int x = -1; x<2; x++) {
-                        for(int y = -1; y<2; y++) {
-                            sumH += grayscale.get(j+x)[i+y]*robertH.get(x+1).get(y+1);
-                            sumV = grayscale.get(j+x)[i+y]*robertV.get(x+1).get(y+1);
+
+                    for (int y = 0; y<hMatrix.size(); y++) {
+                        for(int x = 0; x<hMatrix.get(y).size(); x++) {
+                            sumH += grayscale.get(j+y)[i+x]*hMatrix.get(y).get(x);
+                            sumV += grayscale.get(j+y)[i+x]*vMatrix.get(y).get(x);
                         }
                     }
-
-                    int newGray = sumH+sumV;
+                    int newGray =toPositive(sumH)+toPositive(sumV);
                     int oldGray = grayscale.get(j)[i];
                     int deltaGray = newGray - oldGray;
                     int p = bitmap.getPixel(j,i);
                     bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        setGrayscale();
+    }
+
+    public void edgeDetectLv1(Convolution c, String Operator) {
+        ArrayList<ArrayList<Integer>> hMatrix;
+        ArrayList<ArrayList<Integer>> vMatrix;
+        try {
+            hMatrix = c.getMatrix(Operator);
+            vMatrix = MatrixOperator.rotateLeft(hMatrix);
+
+            for(int y=1; y<bitmap.getHeight()-1; y++){
+                for(int x=1; x<bitmap.getWidth()-1; x++){
+                    int sumH = 0, sumV = 0;
+                    int size = hMatrix.size();
+                    for (int i = -1; i<size-1; i++) {
+                        for(int j = -1; j<size-1; j++) {
+                            sumH += grayscale.get(x+i)[y+j]*hMatrix.get(i+1).get(j+1);
+                            sumV += grayscale.get(x+i)[y+j]*vMatrix.get(i+1).get(j+1);
+                        }
+                    }
+                    int newGray = toPositive(sumH)+toPositive(sumV);
+                    int oldGray = grayscale.get(x)[y];
+                    int deltaGray = newGray - oldGray;
+                    int p = bitmap.getPixel(x,y);
+                    bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        setGrayscale();
+    }
+
+    public  void edgeDetectLv2(Convolution c, String Operator) {
+        ArrayList<ArrayList<Integer>> north;
+        ArrayList<ArrayList<Integer>> west;
+        ArrayList<ArrayList<Integer>> south;
+        ArrayList<ArrayList<Integer>> east;
+        ArrayList<ArrayList<Integer>> northEast;
+        ArrayList<ArrayList<Integer>> southEast;
+        ArrayList<ArrayList<Integer>> southWest;
+        ArrayList<ArrayList<Integer>> northWest;
+
+
+        try {
+            north = c.getMatrix(Operator);
+            west = MatrixOperator.rotateLeft(north);
+            south = MatrixOperator.rotateLeft(west);
+            east = MatrixOperator.rotateLeft(south);
+            northEast = MatrixOperator.rotate1Right(north);
+            southEast = MatrixOperator.rotate1Right(east);
+            southWest = MatrixOperator.rotate1Right(south);
+            northWest = MatrixOperator.rotate1Right(west);
+
+
+            for(int y=1; y<bitmap.getHeight()-1; y++){
+                for(int x=1; x<bitmap.getWidth()-1; x++){
+                    int sumN = 0, sumE = 0, sumS=0, sumW=0, sumNE=0, sumSE=0, sumSW=0, sumNW=0;
+                    int size = north.size();
+                    for (int i = -1; i<size-1; i++) {
+                        for(int j = -1; j<size-1; j++) {
+                            sumN += grayscale.get(x+i)[y+j]*north.get(i+1).get(j+1);
+                            sumE += grayscale.get(x+i)[y+j]*east.get(i+1).get(j+1);
+                            sumS += grayscale.get(x+i)[y+j]*south.get(i+1).get(j+1);
+                            sumW += grayscale.get(x+i)[y+j]*west.get(i+1).get(j+1);
+                            sumNE += grayscale.get(x+i)[y+j]*northEast.get(i+1).get(j+1);
+                            sumSE += grayscale.get(x+i)[y+j]*southEast.get(i+1).get(j+1);
+                            sumSW += grayscale.get(x+i)[y+j]*southWest.get(i+1).get(j+1);
+                            sumNW += grayscale.get(x+i)[y+j]*northWest.get(i+1).get(j+1);
+                        }
+                    }
+                    int newGray =toPositive(sumN)+toPositive(sumE)+toPositive(sumS)+toPositive(sumW)+toPositive(sumNE)+toPositive(sumSE)+toPositive(sumSW)+toPositive(sumNW);
+                    int oldGray = grayscale.get(x)[y];
+                    int deltaGray = newGray - oldGray;
+                    int p = bitmap.getPixel(x,y);
+                    bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
                 }
             }
         } catch (Exception e) {
@@ -417,44 +500,8 @@ public class BitmapEditor{
         return newPixel;
     }
 
-    private Hashtable<String, ArrayList<ArrayList<Integer>>> readJsonStream(InputStream in) throws IOException {
-        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-        try {
-            return readMessages(reader);
-        } finally {
-            reader.close();
-        }
-    }
-
-    private Hashtable<String, ArrayList<ArrayList<Integer>>> readMessages(JsonReader reader) throws IOException {
-        Hashtable<String, ArrayList<ArrayList<Integer>>> messages = new Hashtable<>();
-
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            messages.put(name,readMatrix(reader));
-        }
-        reader.endObject();
-        return messages;
-    }
-
-    private ArrayList<ArrayList<Integer>> readMatrix(JsonReader reader) throws IOException {
-        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>();
-        reader.beginArray();
-        while(reader.hasNext()) {
-            matrix.add(readArray(reader));
-        }
-        reader.endArray();
-        return matrix;
-    }
-
-    private  ArrayList<Integer> readArray(JsonReader reader) throws  IOException {
-        ArrayList<Integer> array = new ArrayList<>();
-        reader.beginArray();
-        while(reader.hasNext()) {
-            array.add(reader.nextInt());
-        }
-        return array;
+    private  int toPositive(int a){
+        return Math.max(a,-1*a);
     }
 
 }

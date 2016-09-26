@@ -131,10 +131,59 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void edgeRobert(View view) {
+    public void robert(View view) {
         if (bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
-            bitmapEditor.edgeRobert(cvl);
+            bitmapEditor.robert(cvl);
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void prewit(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv1(cvl,"Prewit");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void sobel(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv1(cvl,"Sobel");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void freiChi(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv1(cvl,"Frei-Chi");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void prewit8(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv2(cvl,"Prewit8");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void kirch(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv2(cvl,"Kirch");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void robinson3(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv2(cvl,"Robinson3");
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+    public void robinson5(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.edgeDetectLv2(cvl,"Robinson5");
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }

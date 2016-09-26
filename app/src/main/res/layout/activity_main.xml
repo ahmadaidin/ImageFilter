@@ -30,81 +30,81 @@
         android:layout_above="@+id/resetImgButton" />
 
     <Button
-        style="?android:attr/buttonStyleSmall"
+        android:text="Robert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Auto"
-        android:id="@+id/filterButton"
+        android:id="@+id/robert"
+        android:onClick="robert"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:onClick="filterImage"/>
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Smooth"
-        android:id="@+id/smoothButton"
-        android:onClick="smoothImage"
-        android:layout_alignTop="@+id/filterButton"
-        android:layout_toEndOf="@+id/filterButton" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sharp"
-        android:id="@+id/sharpButton"
-        android:onClick="sharpImage"
-        android:layout_alignTop="@+id/smoothButton"
-        android:layout_toEndOf="@+id/smoothButton" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Blur"
-        android:id="@+id/blurButton"
-        android:onClick="blurImage"
-        android:layout_alignParentBottom="true"
-        android:layout_alignTop="@+id/sharpButton"
-        android:layout_toEndOf="@+id/sharpButton" />
-    <Button
-        android:text="Edge 0.1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/edge1button"
-        android:onClick="detectEdge1"
-        android:layout_above="@+id/filterButton"
         android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Prewit"
+        android:id="@+id/prewit"
+        android:onClick="prewit"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/prewit8" />
+
+    <Button
+        android:text="sobel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sobel"
+        android:onClick="sobel"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/prewit" />
 
     <Button
         android:text="Reset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/resetImgButton"
-        android:layout_above="@+id/edge1button"
-        android:layout_alignParentStart="true"
-        android:onClick="resetImage" />
+        android:onClick="resetImage"
+        android:layout_above="@+id/prewit8"
+        android:layout_alignParentStart="true" />
 
     <Button
-        android:text="Robert"
+        android:text="prewit8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/robertButton"
+        android:id="@+id/prewit8"
+        android:onClick="prewit8"
+        android:layout_above="@+id/robert"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kirch"
+        android:id="@+id/kirch"
+        android:onClick="kirch"
+        android:layout_above="@+id/prewit"
+        android:layout_toEndOf="@+id/resetImgButton" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="robin3"
+        android:id="@+id/robin3"
+        android:onClick="robinson3"
+        android:layout_alignBaseline="@+id/kirch"
+        android:layout_alignBottom="@+id/kirch"
+        android:layout_toEndOf="@+id/kirch" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="robin5"
+        android:id="@+id/robin5"
+        android:onClick="robinson5"
         android:layout_below="@+id/imgView"
-        android:layout_toEndOf="@+id/resetImgButton"
-        android:onClick="edgeRobert"/>
-
-    <Button
-        android:text="Edge 0.2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/edge2button"
-        android:onClick="detectEdge2"
-        android:layout_alignBaseline="@+id/edge1button"
-        android:layout_alignBottom="@+id/edge1button"
-        android:layout_toEndOf="@+id/edge1button" />
+        android:layout_toStartOf="@+id/sobel" />
 
 
 </RelativeLayout>
