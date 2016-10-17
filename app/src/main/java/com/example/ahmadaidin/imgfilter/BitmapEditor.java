@@ -36,6 +36,14 @@ public class BitmapEditor{
         setGreylevelHistogram();
     }
 
+    public ArrayList<int[]> getGrayscale(){
+        return grayscale;
+    }
+
+    public int[] getGrayHistogram(){
+        return grayHistogram;
+    }
+
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = Bitmap.createBitmap(bitmap);
         this.oriBitmap =bitmap;
@@ -380,21 +388,21 @@ public class BitmapEditor{
             hMatrix = c.getMatrix("Robert");
             vMatrix = MatrixOperator.rotateLeft(hMatrix);
 
-            for(int i=0; i<bitmap.getHeight()-1; i++){
-                for(int j=0; j<bitmap.getWidth()-1; j++){
+            for(int y=1; y<bitmap.getHeight()-1; y++){
+                for(int x=1; x<bitmap.getWidth()-1; x++){
                     int sumH = 0, sumV = 0;
-
-                    for (int y = 0; y<hMatrix.size(); y++) {
-                        for(int x = 0; x<hMatrix.get(y).size(); x++) {
-                            sumH += grayscale.get(j+y)[i+x]*hMatrix.get(y).get(x);
-                            sumV += grayscale.get(j+y)[i+x]*vMatrix.get(y).get(x);
+                    int size = hMatrix.size();
+                    for (int i = -1; i<size-1; i++) {
+                        for(int j = -1; j<size-1; j++) {
+                            sumH += grayscale.get(x+i)[y+j]*hMatrix.get(i+1).get(j+1);
+                            sumV += grayscale.get(x+i)[y+j]*vMatrix.get(i+1).get(j+1);
                         }
                     }
                     int newGray =toPositive(sumH)+toPositive(sumV);
-                    int oldGray = grayscale.get(j)[i];
+                    int oldGray = grayscale.get(x)[y];
                     int deltaGray = newGray - oldGray;
-                    int p = bitmap.getPixel(j,i);
-                    bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                    int p = bitmap.getPixel(x,y);
+                    bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
                 }
             }
         } catch (Exception e) {
@@ -420,7 +428,7 @@ public class BitmapEditor{
                             sumV += grayscale.get(x+i)[y+j]*vMatrix.get(i+1).get(j+1);
                         }
                     }
-                    int newGray = toPositive(sumH)+toPositive(sumV);
+                    int newGray = toPositive(sumH) + toPositive(sumV);
                     int oldGray = grayscale.get(x)[y];
                     int deltaGray = newGray - oldGray;
                     int p = bitmap.getPixel(x,y);
@@ -453,7 +461,6 @@ public class BitmapEditor{
             southEast = MatrixOperator.rotate1Right(east);
             southWest = MatrixOperator.rotate1Right(south);
             northWest = MatrixOperator.rotate1Right(west);
-
 
             for(int y=1; y<bitmap.getHeight()-1; y++){
                 for(int x=1; x<bitmap.getWidth()-1; x++){
@@ -498,6 +505,15 @@ public class BitmapEditor{
         newPixel = Color.argb(Color.alpha(pixel),r,g,b);
 
         return newPixel;
+    }
+
+    public void binaryConvert(BinaryConverter bC){
+        this.grayscale = bC.convertImage(this.getGrayscale());
+        for(int y=1; y<bitmap.getHeight()-1; y++) {
+            for (int x = 1; x < bitmap.getWidth() - 1; x++) {
+                bitmap.setPixel(x,y,grayscale.get(x)[y]);
+            }
+        }
     }
 
     private  int toPositive(int a){

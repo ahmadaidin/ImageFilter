@@ -13,7 +13,7 @@ public class MatrixOperator {
     }
 
     public static ArrayList<ArrayList<Integer>> rotateLeft(ArrayList<ArrayList<Integer>> mtx) {
-        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>(mtx);
+        ArrayList<ArrayList<Integer>> matrix = copyMatrix(mtx);
         int size = matrix.size();
         // Consider all squares one by one
         for (int x = 0; x < size / 2; x++)
@@ -32,7 +32,7 @@ public class MatrixOperator {
 
                 // move values from bottom to right
                 ArrayList<Integer> row2 = matrix.get(y);
-                row2.set(size-1-x,matrix.get(size-1-x).get(size-1-x));
+                row2.set(size-1-x,matrix.get(size-1-x).get(y));
                 matrix.set(y,row2);
 
                 // move values from left to bottom
@@ -43,14 +43,14 @@ public class MatrixOperator {
                 // assign temp to left
                 ArrayList<Integer> row4 = matrix.get(size-1-y);
                 row4.set(x,temp);
-                matrix.set(size-1-x,row4);
+                matrix.set(size-1-y,row4);
             }
         }
         return matrix;
     }
 
     public static ArrayList<ArrayList<Integer>> rotate1Right(ArrayList<ArrayList<Integer>> matrix) {
-        ArrayList<ArrayList<Integer>> mat = new ArrayList<>(matrix);
+        ArrayList<ArrayList<Integer>> mat = copyMatrix(matrix);
         int m = mat.size();
         int n = m;
 
@@ -124,6 +124,18 @@ public class MatrixOperator {
                 }
             }
             col++;
+        }
+        return mat;
+    }
+
+    private static ArrayList<ArrayList<Integer>> copyMatrix(ArrayList<ArrayList<Integer>> mtx) {
+        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>();
+        for (int i = 0; i<mtx.size(); i++) {
+            ArrayList<Integer> row = new ArrayList<>();
+            for (int j = 0; j<mtx.get(i).size();j++) {
+                row.add(Integer.valueOf(mtx.get(i).get(j)));
+            }
+            matrix.add(row);
         }
         return matrix;
     }

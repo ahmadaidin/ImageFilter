@@ -79,9 +79,9 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Kirch"
-        android:id="@+id/kirch"
-        android:onClick="kirch"
+        android:text="Kirsch"
+        android:id="@+id/kirsch"
+        android:onClick="kirsch"
         android:layout_above="@+id/prewit"
         android:layout_toEndOf="@+id/resetImgButton" />
 
@@ -92,9 +92,9 @@
         android:text="robin3"
         android:id="@+id/robin3"
         android:onClick="robinson3"
-        android:layout_alignBaseline="@+id/kirch"
-        android:layout_alignBottom="@+id/kirch"
-        android:layout_toEndOf="@+id/kirch" />
+        android:layout_alignBaseline="@+id/kirsch"
+        android:layout_alignBottom="@+id/kirsch"
+        android:layout_toEndOf="@+id/kirsch" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
