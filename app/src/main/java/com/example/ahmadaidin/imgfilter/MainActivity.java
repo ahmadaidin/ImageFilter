@@ -1,14 +1,18 @@
 package com.example.ahmadaidin.imgfilter;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -39,8 +43,26 @@ public class MainActivity extends Activity {
         cvl = new Convolution(inputStream);
     }
 
+    public void onPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Should we show an explanation?
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // Explain to the user why we need to read the contacts
+                }
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PackageManager.PERMISSION_GRANTED);
+                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+                // app-defined int constant
+                return;
+            }
+        }
+    }
 
     public void loadImagefromGallery(View view){
+        onPermission();
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
@@ -67,6 +89,7 @@ public class MainActivity extends Activity {
                 imgView = (ImageView) findViewById(R.id.imgView);
                 imgView.setImageBitmap(bitmap);
                 bitmapEditor = new BitmapEditor(bitmap);
+                otsu = new OtsuConverter();
                 otsu.countThreshold(bitmapEditor.getGrayscale(),bitmapEditor.getGrayHistogram());
             } else {
                 Toast.makeText(this, "you haven't picked Image",
@@ -74,6 +97,7 @@ public class MainActivity extends Activity {
             }
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+            Log.d("nyoh","sembarang",e);
         }
     }
 
@@ -121,7 +145,7 @@ public class MainActivity extends Activity {
         if(bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.detectEdge1();
-            bitmapEditor.binaryConvert(otsu);
+            //bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -130,7 +154,7 @@ public class MainActivity extends Activity {
         if(bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.detectEdge2();
-            bitmapEditor.binaryConvert(otsu);
+            //bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -140,6 +164,7 @@ public class MainActivity extends Activity {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.robert(cvl);
             bitmapEditor.binaryConvert(otsu);
+            //bitmapEditor.skeletonize();
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -148,6 +173,7 @@ public class MainActivity extends Activity {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Prewit");
             bitmapEditor.binaryConvert(otsu);
+            //bitmapEditor.skeletonize();
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -156,6 +182,7 @@ public class MainActivity extends Activity {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Sobel");
             bitmapEditor.binaryConvert(otsu);
+            bitmapEditor.skeletonize();
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -163,7 +190,7 @@ public class MainActivity extends Activity {
         if (bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Frei-Chi");
-            bitmapEditor.binaryConvert(otsu);
+           // bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }

@@ -26,17 +26,17 @@ public class BinaryConverter {
     }
 
     public ArrayList<int[]> convertImage(ArrayList<int[]> grayscaleImg){
-        ArrayList<int[]> result = new ArrayList<>(grayscaleImg);
-        for(int i = 0; i<result.size();i++) {
-            int[] newRow = new int[result.get(i).length];
-            for(int j = 0; i<result.get(i).length;j++) {
-                if(result.get(i)[j]<threshold) {
+        ArrayList<int[]> result = new ArrayList<>();
+        for(int i = 0; i<grayscaleImg.size();i++) {
+            int[] newRow = new int[grayscaleImg.get(i).length];
+            for(int j = 0; j<grayscaleImg.get(i).length;j++) {
+                if(grayscaleImg.get(i)[j]<threshold) {
                     newRow[j] = 0;
                 } else {
                     newRow[j] = 255;
                 }
             }
-            result.set(i,newRow);
+            result.add(newRow);
         }
         return result;
     }

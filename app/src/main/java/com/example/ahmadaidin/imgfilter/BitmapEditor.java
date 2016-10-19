@@ -2,6 +2,7 @@ package com.example.ahmadaidin.imgfilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.util.JsonReader;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class BitmapEditor{
 
     }
 
-    public BitmapEditor(Bitmap bitmap){
+    public BitmapEditor(Bitmap bitmap) {
         this.bitmap = Bitmap.createBitmap(bitmap);
         this.oriBitmap = bitmap;
         setGrayscale();
@@ -36,11 +37,11 @@ public class BitmapEditor{
         setGreylevelHistogram();
     }
 
-    public ArrayList<int[]> getGrayscale(){
+    public ArrayList<int[]> getGrayscale() {
         return grayscale;
     }
 
-    public int[] getGrayHistogram(){
+    public int[] getGrayHistogram() {
         return grayHistogram;
     }
 
@@ -511,9 +512,31 @@ public class BitmapEditor{
         this.grayscale = bC.convertImage(this.getGrayscale());
         for(int y=1; y<bitmap.getHeight()-1; y++) {
             for (int x = 1; x < bitmap.getWidth() - 1; x++) {
-                bitmap.setPixel(x,y,grayscale.get(x)[y]);
+                int val = grayscale.get(x)[y];
+                bitmap.setPixel(x,y,Color.rgb(val,val,val));
             }
         }
+    }
+
+    public void skeletonize(){
+        ZhangSuenSkeletonizer skeletonizer = new ZhangSuenSkeletonizer(grayscale);
+        skeletonizer.skeletonize();
+        for(int y=1; y<bitmap.getHeight()-1; y++) {
+            for (int x = 1; x < bitmap.getWidth() - 1; x++) {
+                int val = grayscale.get(x)[y];
+                bitmap.setPixel(x,y,Color.rgb(val,val,val));
+            }
+        }
+    }
+
+    public ArrayList<Feature> extractFeature(){
+        ArrayList<Feature> features = new ArrayList<>();
+        FeatureFinder featureFinder = new FeatureFinder(this.grayscale);
+        Point start = featureFinder.findObject(new Point(-1,-1));
+        if(!start.equals(new Point(-1,-1))) {
+            featureFinder.iterate(features,start,0);
+        }
+        return features;
     }
 
     private  int toPositive(int a){
