@@ -10,101 +10,255 @@
     tools:context="com.example.ahmadaidin.imgfilter.MainActivity">
 
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Load Image"
-        android:id="@+id/loadImgButton"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="loadImagefromGallery"/>
+        android:layout_alignParentStart="true">
 
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/imgView"
-        android:layout_below="@+id/loadImgButton"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/resetImgButton" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-    <Button
-        android:text="Robert"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/robert"
-        android:onClick="robert"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+            <ImageView
+                android:layout_width="match_parent"
+                android:id="@+id/imgView"
+                android:layout_below="@+id/loadImgButton"
+                android:layout_alignParentStart="true"
+                android:layout_above="@+id/resetImgButton"
+                android:layout_height="wrap_content" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Prewit"
-        android:id="@+id/prewit"
-        android:onClick="prewit"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/prewit8" />
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Load Image"
+                android:id="@+id/loadImgButton"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:onClick="loadImagefromGallery"
+                android:layout_weight="1" />
 
-    <Button
-        android:text="sobel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/sobel"
-        android:onClick="sobel"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/prewit" />
+            <Button
+                android:text="Reset"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/resetImgButton"
+                android:onClick="resetImage"
+                android:layout_above="@+id/prewit8"
+                android:layout_alignParentStart="true" />
 
-    <Button
-        android:text="Reset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/resetImgButton"
-        android:onClick="resetImage"
-        android:layout_above="@+id/prewit8"
-        android:layout_alignParentStart="true" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-    <Button
-        android:text="prewit8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/prewit8"
-        android:onClick="prewit8"
-        android:layout_above="@+id/robert"
-        android:layout_alignParentStart="true" />
+                <Button
+                    android:text="Sharpen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/sharp"
+                    android:layout_weight="1"
+                    android:onClick="sharpImage"/>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Kirsch"
-        android:id="@+id/kirsch"
-        android:onClick="kirsch"
-        android:layout_above="@+id/prewit"
-        android:layout_toEndOf="@+id/resetImgButton" />
+                <Button
+                    android:text="Blur"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/blur"
+                    android:layout_weight="1"
+                    android:onClick="blurImage"/>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="robin3"
-        android:id="@+id/robin3"
-        android:onClick="robinson3"
-        android:layout_alignBaseline="@+id/kirsch"
-        android:layout_alignBottom="@+id/kirsch"
-        android:layout_toEndOf="@+id/kirsch" />
+                <Button
+                    android:text="smooth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/smooth"
+                    android:layout_weight="1"
+                    android:onClick="smoothImage"/>
+            </LinearLayout>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="robin5"
-        android:id="@+id/robin5"
-        android:onClick="robinson5"
-        android:layout_below="@+id/imgView"
-        android:layout_toStartOf="@+id/sobel" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:text="Histogram Equalization"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/hist_eq"
+                    android:layout_weight="1"
+                    android:onClick="histEQ"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:text="cross - edge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cross"
+                    android:layout_weight="1"
+                    android:onClick="crossNbrs"/>
+
+                <Button
+                    android:text="centre - edge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/center"
+                    android:layout_weight="1"
+                    android:onClick="centerNbrs"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:text="robert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/robert"
+                    android:layout_weight="1"
+                    android:onClick="robert"/>
+
+                <Button
+                    android:text="prewit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/prewit"
+                    android:layout_weight="1"
+                    android:onClick="prewit"/>
+
+                <Button
+                    android:text="sobel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sobel"
+                    android:layout_weight="1"
+                    android:onClick="sobel"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:text="robin3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/robin3"
+                    android:layout_weight="1"
+                    android:onClick="robinson3"/>
+
+                <Button
+                    android:text="robin5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/robin5"
+                    android:layout_weight="1"
+                    android:onClick="robinson5"/>
+
+                <Button
+                    android:text="kirsch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/kirsch"
+                    android:layout_weight="1"
+                    android:onClick="kirsch"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/prewit8"
+                    android:layout_weight="1"
+                    android:text="prewit8"
+                    android:onClick="prewit8"/>
+
+                <Button
+                    android:text="skeleton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/skeleton"
+                    android:layout_weight="1"
+                    android:onClick="skeletonize"/>
+
+                <Button
+                    android:text="feature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/feature"
+                    android:layout_weight="1"
+                    android:onClick="extractFeature"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:text="Features detected:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/featureText"
+                    android:fontFamily="sans-serif"
+                    android:textSize="18sp"
+                    android:textStyle="normal|bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/featuresNum"
+                    android:layout_weight="0.41"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:text="detect face"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/count_face"
+                    android:layout_weight="1"
+                    android:onClick="detectFace"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/numFace"
+                    android:layout_weight="1"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="normal|bold"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 
 </RelativeLayout>

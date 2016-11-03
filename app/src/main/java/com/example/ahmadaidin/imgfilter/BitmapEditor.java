@@ -1,13 +1,7 @@
 package com.example.ahmadaidin.imgfilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Point;
-import android.util.JsonReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -24,6 +18,8 @@ public class BitmapEditor{
     private ArrayList<int[]> oriGrayscale;
     private int[] grayHistogram;
     private Hashtable<Integer, Integer> convolusionMatrix;
+    public int featuresNum;
+    public int faceNum;
 
     public BitmapEditor() {
 
@@ -35,6 +31,7 @@ public class BitmapEditor{
         setGrayscale();
         oriGrayscale = grayscale;
         setGreylevelHistogram();
+        featuresNum=0;
     }
 
     public ArrayList<int[]> getGrayscale() {
@@ -51,6 +48,8 @@ public class BitmapEditor{
         setGrayscale();
         oriGrayscale = grayscale;
         setGreylevelHistogram();
+        featuresNum=0;
+        faceNum = 0;
     }
 
     public Bitmap bitmap(){
@@ -60,6 +59,8 @@ public class BitmapEditor{
     public void resetBitmap() {
         bitmap = Bitmap.createBitmap(oriBitmap);
         resetGrayscale();
+        featuresNum=0;
+        faceNum = 0;
     }
 
     private void resetGrayscale() {
@@ -72,14 +73,14 @@ public class BitmapEditor{
         ArrayList<int[]> grayscale = new ArrayList<>(bmp.getWidth());
 
 
-        for (int i=0; i< bmp.getWidth(); i++) {
-            int[] col = new int[bmp.getHeight()];
-            for (int j=0; j< bmp.getHeight(); j++) {
-                int c = bmp.getPixel(i,j);
+        for (int y=0; y< bmp.getHeight(); y++) {
+            int[] row = new int[bmp.getWidth()];
+            for (int x=0; x< bmp.getWidth(); x++) {
+                int c = bmp.getPixel(x,y);
                 int gray = Math.round((Color.red(c)+Color.green(c)+Color.blue(c))/3);
-                col[j] = gray;
+                row[x] = gray;
             }
-            grayscale.add(col);
+            grayscale.add(row);
         }
         return grayscale;
     }
@@ -92,9 +93,9 @@ public class BitmapEditor{
         int histogram[] = new int[256];
         for(int i=0; i<histogram.length; i++) histogram[i]=0;
 
-        for(int i = 0; i < grayscale.size(); i++) {
-            for (int j = 0; j<grayscale.get(i).length; j++) {
-                int gray = grayscale.get(i)[j];
+        for(int y = 0; y < grayscale.size(); y++) {
+            for (int x = 0; x<grayscale.get(y).length; x++) {
+                int gray = grayscale.get(y)[x];
                 histogram[gray]++;
             }
         }
@@ -159,12 +160,12 @@ public class BitmapEditor{
 
         Bitmap histogramEQ = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(),bmp.getConfig());
 
-        for(int i=0; i<bmp.getWidth(); i++){
-            for(int j=0; j<bmp.getHeight(); j++){
-                int oldGray = grayscale.get(i)[j];
+        for(int y=0; y<bmp.getHeight(); y++){
+            for(int x=0; x<bmp.getWidth(); x++){
+                int oldGray = grayscale.get(y)[x];
                 int newGray = histLUT.get(oldGray);
                 int deltaGray = newGray - oldGray;
-                int p = bmp.getPixel(i,j);
+                int p = bmp.getPixel(x,y);
 
                 int r = Color.red(p)+deltaGray;
                 int g = Color.green(p)+deltaGray;
@@ -179,7 +180,7 @@ public class BitmapEditor{
                 if (b<0){ b = 0;}
                 else if(b>255){ b = 255; }
 
-                histogramEQ.setPixel(i, j, Color.argb(Color.alpha(p),r,g,b));
+                histogramEQ.setPixel(x, y, Color.argb(Color.alpha(p),r,g,b));
             }
         }
 
@@ -196,9 +197,9 @@ public class BitmapEditor{
         grayHistogram = new int[256];
         for(int i=0; i<grayHistogram.length; i++) grayHistogram[i]=0;
 
-        for(int i = 0; i < grayscale.size(); i++) {
-            for (int j = 0; j<grayscale.get(i).length; j++) {
-                int gray = grayscale.get(i)[j];
+        for(int y = 0; y < grayscale.size(); y++) {
+            for (int x = 0; x<grayscale.get(x).length; x++) {
+                int gray = grayscale.get(y)[x];
                 grayHistogram[gray]++;
             }
         }
@@ -254,14 +255,14 @@ public class BitmapEditor{
 
         Hashtable<Integer,Integer> histLUT = grayLvHistogramEqualizationLUT();
 
-        for(int i=0; i<bitmap.getWidth(); i++){
-            for(int j=0; j<bitmap.getHeight(); j++){
-                int oldGray = grayscale.get(i)[j];
+        for(int y=0; y<bitmap.getHeight(); y++){
+            for(int x=0; x<bitmap.getWidth(); x++){
+                int oldGray = grayscale.get(y)[x];
                 int newGray = histLUT.get(oldGray);
                 int deltaGray = newGray - oldGray;
-                int p = bitmap.getPixel(i,j);
+                int p = bitmap.getPixel(x,y);
 
-                bitmap.setPixel(i, j, manipulatePixel(p,deltaGray));
+                bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
             }
         }
         setGrayscale();
@@ -269,24 +270,24 @@ public class BitmapEditor{
 
     public void smoothImage() {
 
-        for(int i=1; i<bitmap.getWidth()-1; i++){
-            for(int j=1; j<bitmap.getHeight()-1; j++){
+        for(int y=1; y<bitmap.getHeight()-1; y++){
+            for(int x=1; x<bitmap.getWidth()-1; x++){
                 int sum = 0;
-                for (int x = -1; x<2; x++) {
-                    for(int y = -1; y<2; y++) {
-                        sum += grayscale.get(i+x)[j+y];
+                for (int dy = -1; dy<2; dy++) {
+                    for(int dx = -1; dx<2; dx++) {
+                        sum += grayscale.get(y+dy)[x+dx];
                     }
                 }
                 int avg = sum / 9;
-                int oldGray = grayscale.get(i)[j];
+                int oldGray = grayscale.get(y)[x];
                 int deltaGray = avg - oldGray;
-                int p = bitmap.getPixel(i,j);
+                int p = bitmap.getPixel(x,y);
 
                 int r = Color.red(p)+deltaGray;
                 int g = Color.green(p)+deltaGray;
                 int b = Color.blue(p)+deltaGray;
 
-                bitmap.setPixel(i, j, Color.argb(Color.alpha(p),r,g,b));
+                bitmap.setPixel(x, y, Color.argb(Color.alpha(p),r,g,b));
             }
         }
         setGrayscale();
@@ -299,19 +300,19 @@ public class BitmapEditor{
                 {0,-1,0}
         };
 
-        for(int i=1; i<bitmap.getHeight()-1; i++){
-            for(int j=1; j<bitmap.getWidth()-1; j++){
+        for(int y=1; y<bitmap.getHeight()-1; y++){
+            for(int x=1; x<bitmap.getWidth()-1; x++){
                 int sum = 0;
-                for (int x = -1; x<2; x++) {
-                    for(int y = -1; y<2; y++) {
-                        int c = grayscale.get(j+x)[i+y];
-                        sum += filter[x+1][y+1]*c;
+                for (int dy = -1; dy<2; dy++) {
+                    for(int dx = -1; dx<2; dx++) {
+                        int c = grayscale.get(y+dy)[x+dx];
+                        sum += filter[dx+1][dy+1]*c;
                     }
                 }
-                int oldGray = grayscale.get(j)[i];
+                int oldGray = grayscale.get(y)[x];
                 int deltaGray = sum - oldGray;
-                int p = bitmap.getPixel(j,i);
-                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                int p = bitmap.getPixel(x,y);
+                bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
             }
         }
         setGrayscale();
@@ -324,59 +325,59 @@ public class BitmapEditor{
                 {0.0,0.2,0.0}
         };
 
-        for(int i=1; i<bitmap.getHeight()-1; i++){
-            for(int j=1; j<bitmap.getWidth()-1; j++){
+        for(int y=1; y<bitmap.getHeight()-1; y++){
+            for(int x=1; x<bitmap.getWidth()-1; x++){
                 int sum = 0;
-                for (int x = -1; x<2; x++) {
-                    for(int y = -1; y<2; y++) {
-                        int c = grayscale.get(j+x)[i+y];
-                        sum += filter[x+1][y+1]*c;
+                for (int dy = -1; dy<2; dy++) {
+                    for(int dx = -1; dx<2; dx++) {
+                        int c = grayscale.get(y+dy)[x+dx];
+                        sum += filter[dx+1][dy+1]*c;
                     }
                 }
-                int oldGray = grayscale.get(j)[i];
+                int oldGray = grayscale.get(y)[x];
                 int deltaGray = sum - oldGray;
-                int p = bitmap.getPixel(j,i);
-                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                int p = bitmap.getPixel(x,y);
+                bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
             }
         }
         setGrayscale();
     }
 
-    public void detectEdge1(){
-        for(int i=1; i<bitmap.getHeight()-1; i++){
-            for(int j=1; j<bitmap.getWidth()-1; j++){
-                int Opt1 = Math.abs(grayscale.get(j-1)[i-1]-grayscale.get(j+1)[i+1]);
-                int Opt2 = Math.abs(grayscale.get(j)[i-1]-grayscale.get(j)[i+1]);
-                int Opt3 = Math.abs(grayscale.get(j+1)[i-1]-grayscale.get(j-1)[i+1]);
-                int Opt4 = Math.abs(grayscale.get(j-1)[i-1]-grayscale.get(j+1)[i+1]);
+    public void crossNbrs(){
+        for(int y=1; y<bitmap.getHeight()-1; y++){
+            for(int x=1; x<bitmap.getWidth()-1; x++){
+                int Opt1 = Math.abs(grayscale.get(y-1)[x-1]-grayscale.get(y+1)[x+1]);
+                int Opt2 = Math.abs(grayscale.get(y)[x-1]-grayscale.get(y)[x+1]);
+                int Opt3 = Math.abs(grayscale.get(y+1)[x-1]-grayscale.get(y-1)[x+1]);
+                int Opt4 = Math.abs(grayscale.get(y-1)[x-1]-grayscale.get(y+1)[x+1]);
 
                 int newGray = Math.max(Math.max(Math.max(Opt1,Opt2),Opt3),Opt4);
 
-                int oldGray = grayscale.get(j)[i];
+                int oldGray = grayscale.get(y)[x];
                 int deltaGray = newGray - oldGray;
-                int p = bitmap.getPixel(j,i);
-                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                int p = bitmap.getPixel(x,y);
+                bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
             }
         }
         setGrayscale();
     }
 
-    public void detectEdge2(){
-        for(int i=1; i<bitmap.getHeight()-1; i++){
-            for(int j=1; j<bitmap.getWidth()-1; j++){
+    public void centerNbrs(){
+        for(int y=1; y<bitmap.getHeight()-1; y++){
+            for(int x=1; x<bitmap.getWidth()-1; x++){
                 int max = 0;
-                for (int x = -1; x<2; x++) {
-                    for(int y = -1; y<2; y++) {
-                        int opt = Math.abs(grayscale.get(j)[i]-grayscale.get(j+x)[i+y]);
+                for (int dy = -1; dy<2; dy++) {
+                    for(int dx = -1; dx<2; dx++) {
+                        int opt = Math.abs(grayscale.get(y)[x]-grayscale.get(y+dy)[x+dx]);
                         max = Math.max(max,opt);
                     }
                 }
                 int newGray = max;
 
-                int oldGray = grayscale.get(j)[i];
+                int oldGray = grayscale.get(y)[x];
                 int deltaGray = newGray - oldGray;
-                int p = bitmap.getPixel(j,i);
-                bitmap.setPixel(j, i, manipulatePixel(p,deltaGray));
+                int p = bitmap.getPixel(x,y);
+                bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
             }
         }
         setGrayscale();
@@ -393,10 +394,10 @@ public class BitmapEditor{
                 for(int x=1; x<bitmap.getWidth()-1; x++){
                     int sumH = 0, sumV = 0;
                     int size = hMatrix.size();
-                    for (int i = -1; i<size-1; i++) {
-                        for(int j = -1; j<size-1; j++) {
-                            sumH += grayscale.get(x+i)[y+j]*hMatrix.get(i+1).get(j+1);
-                            sumV += grayscale.get(x+i)[y+j]*vMatrix.get(i+1).get(j+1);
+                    for (int dy = -1; dy<size-1; dy++) {
+                        for(int dx = -1; dx<size-1; dx++) {
+                            sumH += grayscale.get(y+dy)[x+dx]*hMatrix.get(dy+1).get(dx+1);
+                            sumV += grayscale.get(y+dy)[x+dx]*vMatrix.get(dy+1).get(dx+1);
                         }
                     }
                     int newGray =toPositive(sumH)+toPositive(sumV);
@@ -423,14 +424,14 @@ public class BitmapEditor{
                 for(int x=1; x<bitmap.getWidth()-1; x++){
                     int sumH = 0, sumV = 0;
                     int size = hMatrix.size();
-                    for (int i = -1; i<size-1; i++) {
-                        for(int j = -1; j<size-1; j++) {
-                            sumH += grayscale.get(x+i)[y+j]*hMatrix.get(i+1).get(j+1);
-                            sumV += grayscale.get(x+i)[y+j]*vMatrix.get(i+1).get(j+1);
+                    for (int dy = -1; dy<size-1; dy++) {
+                        for(int dx = -1; dx<size-1; dx++) {
+                            sumH += grayscale.get(y+dy)[x+dx]*hMatrix.get(dy+1).get(dx+1);
+                            sumV += grayscale.get(y+dy)[x+dx]*vMatrix.get(dy+1).get(dx+1);
                         }
                     }
                     int newGray = toPositive(sumH) + toPositive(sumV);
-                    int oldGray = grayscale.get(x)[y];
+                    int oldGray = grayscale.get(y)[x];
                     int deltaGray = newGray - oldGray;
                     int p = bitmap.getPixel(x,y);
                     bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
@@ -467,20 +468,20 @@ public class BitmapEditor{
                 for(int x=1; x<bitmap.getWidth()-1; x++){
                     int sumN = 0, sumE = 0, sumS=0, sumW=0, sumNE=0, sumSE=0, sumSW=0, sumNW=0;
                     int size = north.size();
-                    for (int i = -1; i<size-1; i++) {
-                        for(int j = -1; j<size-1; j++) {
-                            sumN += grayscale.get(x+i)[y+j]*north.get(i+1).get(j+1);
-                            sumE += grayscale.get(x+i)[y+j]*east.get(i+1).get(j+1);
-                            sumS += grayscale.get(x+i)[y+j]*south.get(i+1).get(j+1);
-                            sumW += grayscale.get(x+i)[y+j]*west.get(i+1).get(j+1);
-                            sumNE += grayscale.get(x+i)[y+j]*northEast.get(i+1).get(j+1);
-                            sumSE += grayscale.get(x+i)[y+j]*southEast.get(i+1).get(j+1);
-                            sumSW += grayscale.get(x+i)[y+j]*southWest.get(i+1).get(j+1);
-                            sumNW += grayscale.get(x+i)[y+j]*northWest.get(i+1).get(j+1);
+                    for (int dy = -1; dy<size-1; dy++) {
+                        for(int dx = -1; dx<size-1; dx++) {
+                            sumN += grayscale.get(y+dy)[x+dx]*north.get(dy+1).get(dx+1);
+                            sumE += grayscale.get(y+dy)[x+dx]*east.get(dy+1).get(dx+1);
+                            sumS += grayscale.get(y+dy)[x+dx]*south.get(dy+1).get(dx+1);
+                            sumW += grayscale.get(y+dy)[x+dx]*west.get(dy+1).get(dx+1);
+                            sumNE += grayscale.get(y+dy)[x+dx]*northEast.get(dy+1).get(dx+1);
+                            sumSE += grayscale.get(y+dy)[x+dx]*southEast.get(dy+1).get(dx+1);
+                            sumSW += grayscale.get(y+dy)[x+dx]*southWest.get(dy+1).get(dx+1);
+                            sumNW += grayscale.get(y+dy)[x+dx]*northWest.get(dy+1).get(dx+1);
                         }
                     }
                     int newGray =toPositive(sumN)+toPositive(sumE)+toPositive(sumS)+toPositive(sumW)+toPositive(sumNE)+toPositive(sumSE)+toPositive(sumSW)+toPositive(sumNW);
-                    int oldGray = grayscale.get(x)[y];
+                    int oldGray = grayscale.get(y)[x];
                     int deltaGray = newGray - oldGray;
                     int p = bitmap.getPixel(x,y);
                     bitmap.setPixel(x, y, manipulatePixel(p,deltaGray));
@@ -509,10 +510,21 @@ public class BitmapEditor{
     }
 
     public void binaryConvert(BinaryConverter bC){
-        this.grayscale = bC.convertImage(this.getGrayscale());
+        ArrayList<int[]> newGray= bC.convertImage(this.getGrayscale());
+        this.grayscale = newGray;
         for(int y=1; y<bitmap.getHeight()-1; y++) {
             for (int x = 1; x < bitmap.getWidth() - 1; x++) {
-                int val = grayscale.get(x)[y];
+                int val = grayscale.get(y)[x];
+                bitmap.setPixel(x,y,Color.rgb(val,val,val));
+            }
+        }
+    }
+
+    public void binaryConvertInvers(BinaryConverter bC){
+        this.grayscale = bC.convertImageInvers(this.getGrayscale());
+        for(int y=1; y<bitmap.getHeight()-1; y++) {
+            for (int x = 1; x < bitmap.getWidth() - 1; x++) {
+                int val = grayscale.get(y)[x];
                 bitmap.setPixel(x,y,Color.rgb(val,val,val));
             }
         }
@@ -523,20 +535,36 @@ public class BitmapEditor{
         skeletonizer.skeletonize();
         for(int y=1; y<bitmap.getHeight()-1; y++) {
             for (int x = 1; x < bitmap.getWidth() - 1; x++) {
-                int val = grayscale.get(x)[y];
+                int val = grayscale.get(y)[x];
                 bitmap.setPixel(x,y,Color.rgb(val,val,val));
             }
         }
     }
 
-    public ArrayList<Feature> extractFeature(){
-        ArrayList<Feature> features = new ArrayList<>();
+    public void extractFeature(){
         FeatureFinder featureFinder = new FeatureFinder(this.grayscale);
-        Point start = featureFinder.findObject(new Point(-1,-1));
-        if(!start.equals(new Point(-1,-1))) {
-            featureFinder.iterate(features,start,0);
+        ArrayList<Feature> features = featureFinder.findFeatures();
+        featuresNum = features.size();
+        for(int y=0; y<bitmap.getHeight(); y++) {
+            for (int x = 0; x < bitmap.getWidth(); x++) {
+                bitmap.setPixel(x,y,Color.rgb(0,0,0));
+            }
         }
-        return features;
+        for(int i = 0; i<features.size(); i++) {
+            printFeatures(features.get(i));
+        }
+    }
+
+    public void printFeatures(Feature feature) {
+        for(int i =0; i<feature.pixelPosSize(); i++) {
+            bitmap.setPixel(feature.getPixelPosElmt(i).x,feature.getPixelPosElmt(i).y,Color.rgb(255,255,0));
+        }
+    }
+
+    public void detectFace() {
+        MyFaceDetector faceDetector = new MyFaceDetector(bitmap);
+        faceDetector.detectFace();
+        faceNum = faceDetector.getFaceNum();
     }
 
     private  int toPositive(int a){

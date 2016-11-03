@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -26,6 +27,8 @@ public class MainActivity extends Activity {
     String imgDecodableString;
     BitmapEditor bitmapEditor;
     ImageView imgView;
+    TextView featuresNum;
+    TextView faceNum;
     Bitmap bitmap;
     Convolution cvl;
     String s = "";
@@ -103,13 +106,15 @@ public class MainActivity extends Activity {
 
     public void resetImage(View view) {
         if (bitmapEditor.bitmap()!= null) {
+            featuresNum = (TextView) findViewById(R.id.featuresNum);
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.resetBitmap();
             imgView.setImageBitmap(bitmapEditor.bitmap());
+            featuresNum.setText(""+bitmapEditor.featuresNum);
         }
     }
 
-    public void filterImage(View view) {
+    public void histEQ(View view) {
         if (bitmapEditor.bitmap()!= null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.grayLvHistogramEqualization();
@@ -141,20 +146,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void detectEdge1(View view) {
+    public void crossNbrs(View view) {
         if(bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
-            bitmapEditor.detectEdge1();
-            //bitmapEditor.binaryConvert(otsu);
+            bitmapEditor.crossNbrs();
+            bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
 
-    public void detectEdge2(View view) {
+    public void centerNbrs(View view) {
         if(bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
-            bitmapEditor.detectEdge2();
-            //bitmapEditor.binaryConvert(otsu);
+            bitmapEditor.centerNbrs();
+            bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -163,8 +168,7 @@ public class MainActivity extends Activity {
         if (bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.robert(cvl);
-            bitmapEditor.binaryConvert(otsu);
-            //bitmapEditor.skeletonize();
+            bitmapEditor.binaryConvertInvers(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -173,7 +177,6 @@ public class MainActivity extends Activity {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Prewit");
             bitmapEditor.binaryConvert(otsu);
-            //bitmapEditor.skeletonize();
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -182,7 +185,6 @@ public class MainActivity extends Activity {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Sobel");
             bitmapEditor.binaryConvert(otsu);
-            bitmapEditor.skeletonize();
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -190,7 +192,7 @@ public class MainActivity extends Activity {
         if (bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
             bitmapEditor.edgeDetectLv1(cvl,"Frei-Chi");
-           // bitmapEditor.binaryConvert(otsu);
+            bitmapEditor.binaryConvert(otsu);
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
@@ -215,6 +217,7 @@ public class MainActivity extends Activity {
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
+
     public void robinson5(View view) {
         if (bitmapEditor.bitmap() != null) {
             imgView = (ImageView) findViewById(R.id.imgView);
@@ -222,4 +225,36 @@ public class MainActivity extends Activity {
             imgView.setImageBitmap(bitmapEditor.bitmap());
         }
     }
+
+    public void skeletonize(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            bitmapEditor.binaryConvertInvers(otsu);
+            bitmapEditor.skeletonize();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+        }
+    }
+
+    public void extractFeature(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            featuresNum = (TextView) findViewById(R.id.featuresNum);
+            bitmapEditor.binaryConvertInvers(otsu);
+            bitmapEditor.skeletonize();
+            bitmapEditor.extractFeature();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+            featuresNum.setText(""+bitmapEditor.featuresNum);
+        }
+    }
+
+    public void detectFace(View view) {
+        if (bitmapEditor.bitmap() != null) {
+            imgView = (ImageView) findViewById(R.id.imgView);
+            faceNum = (TextView) findViewById(R.id.numFace);
+            bitmapEditor.detectFace();
+            imgView.setImageBitmap(bitmapEditor.bitmap());
+            faceNum.setText(""+bitmapEditor.faceNum);
+        }
+    }
+
 }

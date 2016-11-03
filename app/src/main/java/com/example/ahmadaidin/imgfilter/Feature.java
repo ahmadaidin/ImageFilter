@@ -34,7 +34,8 @@ public class Feature {
     }
 
     public void addPixelPos(Point elmt) {
-        pixelPos.add(elmt);
+        Point p = new Point(elmt);
+        pixelPos.add(p);
     }
 
     public Integer getDirectionElmt(int idx) {
@@ -46,11 +47,12 @@ public class Feature {
     }
 
     public void setDirectionElmt(int idx, Integer elmt) {
-        direction.set(idx, elmt);
+         direction.set(idx, elmt);
     }
 
     public void setPixelPosElmt(int idx, Point elmt) {
-        pixelPos.set(idx, elmt);
+        Point p = new Point(elmt);
+        pixelPos.add(p);pixelPos.set(idx, p);
     }
 
     public int directionSize(){

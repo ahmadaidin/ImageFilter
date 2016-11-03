@@ -1,11 +1,8 @@
 package com.example.ahmadaidin.imgfilter;
-
-import android.graphics.Bitmap;
-import android.graphics.Picture;
 import android.graphics.Point;
+import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 /**
  * Created by Aidin - 2 on 05/10/2016.
@@ -14,8 +11,8 @@ import java.util.Hashtable;
 public class FeatureFinder {
 
     private ArrayList<int[]> grayscale;
-    private ArrayList<Feature> features;
-
+    private final int maxRadius=5;
+    private final Point[][] nearPixel = generateNearPixelMtx(maxRadius);
     public FeatureFinder() {
         grayscale = new ArrayList<>();
     }
@@ -28,119 +25,162 @@ public class FeatureFinder {
         this.grayscale = grayscale;
     }
 
-    public void iterate(ArrayList<Feature> features, Point iterator, int repetition){
-        Feature paths;
-        Feature feature = new Feature();
-        if (grayscale.get(iterator.y)[iterator.y] == 255) {
-            int ignoredColor = 255;
-            while(grayscale.get(iterator.y)[iterator.x]!=0) {
-                feature.addPixelPos(new Point(iterator));
-                paths = findPath(ignoredColor,iterator);
-                if(paths.directionSize()==1){
-                    feature.addPixelPos(paths.getPixelPosElmt(0));
-                    feature.addDirection(paths.getDirectionElmt(0));
-                    int[] row = grayscale.get(paths.getPixelPosElmt(0).y);
-                    row[paths.getPixelPosElmt(0).x] = 200;
-                } else {
-                    if (repetition == 0) {
-                        feature.clear();
-                        repetition++;
-                        ignoredColor = 200;
-                    } else {
-                        ignoredColor = 255;
-                        features.add(feature);
-                    }
-
-                    if(paths.directionSize()==0) {
-                        //
-                    } else if(paths.directionSize()>1){
-                        for(int i = 0; i<paths.pixelPosSize(); i++) {
-                            Point start = new Point(iterator);
-                            iterate(features,start,repetition);
-                        }
-                    }
-                }
+    public void iterate(ArrayList<Feature> features, Point iterator){
+        setVisited(iterator);
+        Feature paths = findPath(iterator);
+        for(int i = 0; i<paths.pixelPosSize(); i++) {
+            Feature feature = new Feature();
+            feature.addPixelPos(iterator);
+            feature.addDirection(paths.getDirectionElmt(i));
+            Point start = new Point(paths.getPixelPosElmt(i));
+            addPixelToFeature(feature, start);
+            if(feature.pixelPosSize()!=0){
+                features.add(feature);
             }
         }
     }
 
-    public Feature findPath(int ignoredColor, Point iterator) {
+    public void addPixelToFeature(Feature feature, Point iterator) {
+        feature.addPixelPos(iterator);
+        Feature paths = findPath(iterator);
+        while(paths.pixelPosSize()==1) {
+            setVisited(iterator);
+            iterator = new Point(paths.getPixelPosElmt(0));
+            feature.addDirection(paths.getDirectionElmt(0));
+            feature.addPixelPos(paths.getPixelPosElmt(0));
+            paths = findPath(iterator);
+            int radius = 2;
+            if(paths.pixelPosSize()==0) {
+                Log.d("apakah 0? "," ya");
+                boolean found = false;
+                while (!found && radius<=maxRadius) {
+                    int start = maxRadius-radius;
+                    int end = start + 2* radius;
+                    for (int i = start; i <= end; i++) {
+                        int j = start;
+                        while (j<=end){
+                            int newX = iterator.x + nearPixel[i][j].x;
+                            int newY = iterator.y + nearPixel[i][j].y;
+                            if (newY < 0 || newY >= grayscale.size())
+                                continue;
+                            if (newX < 0 || newX >= grayscale.get(newY).length)
+                                continue;
+                            if (grayscale.get(newY)[newX] == 255) {
+                                Log.d("iterator",""+iterator.x+","+iterator.y);
+                                Log.d("founded point",""+newX+","+newY);
+                                Log.d("ketemu di radius",""+radius);
+                                found = true;
+                                Point p1 = new Point(iterator);
+                                Point p2 = new Point(newX, newY);
+                                Line line = new Line(p1, p2);
+                                ArrayList<Point> linePoints = line.getAllPoints();
+                                for (int k = 1; k < linePoints.size(); k++) {
+                                    grayscale.get(linePoints.get(k).y)[linePoints.get(k).x] = 255;
+                                }
+                            }
+                            if (i !=start && i !=end)
+                                j+=radius*2;
+                            else j++;
+                            //if(found) break;
+                        }
+                       // if(found) break;
+                    }
+                    radius++;
+                }
+                if (!found)
+                    Log.d("tidak ketemu","radius: "+radius);
+            }
+            paths = findPath(iterator);
+        }
+    }
+
+    public void setVisited(Point p) {
+        grayscale.get(p.y)[p.x]=200;
+    }
+
+    public Point[][] generateNearPixelMtx(int maxRadius){
+        int size = maxRadius*2+1;
+        Point[][] nearPixel = new Point[size][size];
+        for(int i = 0; i<size; i++){
+            for(int j = 0; j<size;j++) {
+                Point p = new Point(j-maxRadius,i-maxRadius);
+                nearPixel[i][j] = p;
+            }
+        }
+        return nearPixel;
+    }
+
+    public ArrayList<Feature> findFeatures() {
+        ArrayList<Feature> features = new ArrayList<>();
+        Point iterator = new Point(0,0);
+        while (iterator.y < grayscale.size()) {
+            while (iterator.x < grayscale.get(iterator.y).length) {
+                if (grayscale.get(iterator.y)[iterator.x] == 255) {
+//                    Log.d("ketemu objek",""+iterator.x+","+iterator.y);
+                    Point foundStart = new Point(iterator);
+                    iterate(features,iterator);
+                    iterator.set(foundStart.x,foundStart.y);
+                }
+                iterator.offset(1, 0);
+            }
+            iterator.set(0,iterator.y+1);
+        }
+        Log.d("jumlah fitur:",""+features.size());
+        return features;
+    }
+
+    public Feature findPath(Point iterator) {
         Feature paths = new Feature();
-        Point searcher = new Point(iterator);
-        if(grayscale.get(iterator.y-1)[iterator.x-1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor){
+        Point searcher;
+        if(grayscale.get(iterator.y-1)[iterator.x-1]==255){
+            searcher= new Point(iterator);
             searcher.offset(-1,-1);
             paths.addPixelPos(searcher);
             paths.addDirection(1);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y-1)[iterator.x]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
-            searcher.offset(0,-1);paths.addPixelPos(searcher);
+        if (grayscale.get(iterator.y-1)[iterator.x]==255 ) {
+            searcher= new Point(iterator);
+            searcher.offset(0,-1);
+            paths.addPixelPos(searcher);
             paths.addDirection(2);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y-1)[iterator.x+1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y-1)[iterator.x+1]==255 ) {
+            searcher= new Point(iterator);
             searcher.offset(1,-1);
             paths.addPixelPos(searcher);
             paths.addDirection(3);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y)[iterator.x+1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y)[iterator.x+1]==255 ) {
+            searcher= new Point(iterator);
             searcher.offset(1,0);
             paths.addPixelPos(searcher);
             paths.addDirection(4);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y+1)[iterator.x+1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y+1)[iterator.x+1]==255) {
+            searcher= new Point(iterator);
             searcher.offset(1,1);
             paths.addPixelPos(searcher);
             paths.addDirection(5);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y+1)[iterator.x]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y+1)[iterator.x]==255) {
+            searcher= new Point(iterator);
             searcher.offset(0,1);
             paths.addPixelPos(searcher);
             paths.addDirection(6);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y+1)[iterator.x-1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y+1)[iterator.x-1]==255 ) {
+            searcher= new Point(iterator);
             searcher.offset(-1,1);
             paths.addPixelPos(searcher);
             paths.addDirection(7);
-            searcher.set(iterator.x,iterator.y);
         }
-        if (grayscale.get(iterator.y)[iterator.x-1]==255 || grayscale.get(iterator.y-1)[iterator.x-1]==ignoredColor) {
+        if (grayscale.get(iterator.y)[iterator.x-1]==255) {
+            searcher= new Point(iterator);
             searcher.offset(-1,0);
             paths.addPixelPos(searcher);
             paths.addDirection(8);
-            searcher.set(iterator.x,iterator.y);
         }
         return paths;
-    }
-
-    public Point findObject(Point defaultReturn) {
-        Point iterator = new Point();
-        iterator.set(grayscale.get(0).length/2,0);
-        boolean found = false;
-        while(!found && iterator.y<grayscale.size()) {
-            if(grayscale.get(iterator.y)[iterator.x]==255) {
-                found = true;
-            } else {
-                iterator.offset(0, 1);
-            }
-        }
-        iterator.set(0,grayscale.size()/2);
-        while(!found && iterator.x<grayscale.get(grayscale.size()/2).length) {
-            if(grayscale.get(iterator.y)[iterator.x]==255) {
-                found = true;
-            } else {
-                iterator.offset(1, 0);
-            }
-        }
-        if(!found) {
-            return defaultReturn;
-        } else {
-            return iterator;
-        }
     }
 
 }

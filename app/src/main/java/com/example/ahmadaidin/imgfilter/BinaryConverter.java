@@ -40,4 +40,20 @@ public class BinaryConverter {
         }
         return result;
     }
+
+    public ArrayList<int[]> convertImageInvers(ArrayList<int[]> grayscaleImg){
+        ArrayList<int[]> result = new ArrayList<>();
+        for(int i = 0; i<grayscaleImg.size();i++) {
+            int[] newRow = new int[grayscaleImg.get(i).length];
+            for(int j = 0; j<grayscaleImg.get(i).length;j++) {
+                if(grayscaleImg.get(i)[j]>=threshold) {
+                    newRow[j] = 0;
+                } else {
+                    newRow[j] = 255;
+                }
+            }
+            result.add(newRow);
+        }
+        return result;
+    }
 }
