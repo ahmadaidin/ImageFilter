@@ -2,6 +2,7 @@ package com.example.ahmadaidin.imgfilter;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 
 import java.util.ArrayList;
 
@@ -10,79 +11,75 @@ import java.util.ArrayList;
  */
 
 public class MyFaceDetector extends FaceDetector {
-    private ArrayList <Integer> faceColor;
-    final int threshold = 5;
+    private int[] skinColors;
+    private ArrayList<ArrayList<Point>> skins;
+    private int visitedColor;
+    final static int[][] nbrs = {
+            {-1, -1}/*1*/, {0, -1}/*2*/, {1, -1}/*3*/,
+            {1, 0}/*4*/, {1, 1}/*5*/, {0, 1}/*6*/,
+            {-1, 1}/*7*/,{-1, 0}/*8*/
+    };
 
     public MyFaceDetector(Bitmap bitmap){
         super(bitmap);
-        faceColor.add(Color.rgb(141,85,36));
-        faceColor.add(Color.rgb(198,143,66));
-        faceColor.add(Color.rgb(224,172,105));
-        faceColor.add(Color.rgb(241,194,125));
-        faceColor.add(Color.rgb(255,219,172));
-        int size = faceColor.size();
-        for (int i = 0; i<size; i++) {
-            for (int j = 1; j <= threshold; j++) {
-                faceColor.add(faceColor.get(i) + j);
-                faceColor.add(faceColor.get(i) - j);
-            }
-        }
+        skinColors = new int[0];
+        visitedColor = 0;
     }
 
     public void detectFace(){
-        int x = 0;
-        int y = 0;
-        int countface = 0;
-        int faceHeight =0;
+
+    }
+
+    public void findSkin(){
+        for(int y=0; y<bitmap.getHeight(); y++) {
+            for(int x=0; x<bitmap.getWidth(); x++) {
+                if(!isVisited(x,y)) { //cek sudah dilewati atau belum, eksekusi jika belum dilewati
+                    ArrayList<Point> skin = new ArrayList<>();
+                    checkNbrs(skin,x,y);
+                    if(skin.size()!=0){
+                        skins.add(skin);
+                    }
+                }
+            }
+        }
+    }
+
+    public void checkNbrs(ArrayList<Point> skin, int x, int y){//cek 8 arah pixel yang lain hingga tidak menemukan yang bersebelahan
+        if(x>=bitmap.getWidth() || y>=bitmap.getHeight() || x<0 || y<0){//lewat batas
+            //do nothing
+        } else {
+            if(isVisited(x,y)) {//sudah dikunjungi
+                //do nothing
+            } else{ //belum dikunjungi
+                setVisited(x, y);
+                if (hasSkinColor(x, y)) {//punya warna kulit
+                    skin.add(new Point(x, y));
+                    for (int i = 0; i < nbrs.length; i++) {
+                        checkNbrs(skin, x + nbrs[i][0], y + nbrs[i][1]);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean hasSkinColor(int x, int y){
         boolean found = false;
-        boolean sameFace = true;
-        while(y < bitmap.getHeight()) {
-            int border = 0;
-            while(x < bitmap.getWidth()) {
-                if (border <= 1) {
-                    int y1 = y;
-                    findFaceColor(x, y, found);
-                    if (found) {
-                        int h = y1-y;
-                        if(h==1){
-                            faceHeight++;
-                        } else{
-                            if(true){
-
-                            }
-                        }
-
-                    } else {
-
-                    }
-                } else {
-
-                }
-            }
+        int i=0;
+        while (!found && i < skinColors.length) {//pixel dicek warnanya apakah
+            // sama seperti warna kulit atau tidak
+            if (bitmap.getPixel(x, y) == skinColors[i]) found = true;
+            i++;
         }
 
-
-        if(true) sameFace = true;
-        if(!sameFace) countface++;
-
+        return found;
     }
 
-    public void findFaceColor(int x, int y, boolean found){
-        found = false;
-        while (!found && y< bitmap.getHeight()){
-            while(!found && x< bitmap.getWidth()) {
-                int i = 0;
-                while(!found && i < faceColor.size()) {
-                    if(bitmap.getPixel(x,y)==faceColor.get(i)){
-                        found = true;
-                    }
-                    i++;
-                }
-                if (!found)
-                    x++;
-            }
-            if (!found)
-                y++;
-        }
+    public void setVisited(int x, int y){
+        bitmap.setPixel(x,y,0);
     }
+
+    public boolean isVisited(int x, int y) {
+        return bitmap.getPixel(x,y)==0;
+    }
+
 }
