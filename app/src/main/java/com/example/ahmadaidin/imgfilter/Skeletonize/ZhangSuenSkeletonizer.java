@@ -1,6 +1,8 @@
-package com.example.ahmadaidin.imgfilter;
+package com.example.ahmadaidin.imgfilter.Skeletonize;
 
 import android.graphics.Point;
+
+import com.example.ahmadaidin.imgfilter.Skeletonize.Skeletonizer;
 
 import java.util.ArrayList;
 import java.util.List;

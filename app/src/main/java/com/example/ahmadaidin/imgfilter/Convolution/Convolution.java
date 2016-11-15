@@ -1,4 +1,4 @@
-package com.example.ahmadaidin.imgfilter;
+package com.example.ahmadaidin.imgfilter.Convolution;
 import android.util.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;

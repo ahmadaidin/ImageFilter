@@ -18,9 +18,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
+import com.example.ahmadaidin.imgfilter.BinaryConverter.OtsuConverter;
+import com.example.ahmadaidin.imgfilter.Convolution.Convolution;
+
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class MainActivity extends Activity {
     private static int RESULT_LOAD_IMG = 1;

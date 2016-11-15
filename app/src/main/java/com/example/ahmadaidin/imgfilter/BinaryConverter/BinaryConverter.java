@@ -1,4 +1,4 @@
-package com.example.ahmadaidin.imgfilter;
+package com.example.ahmadaidin.imgfilter.BinaryConverter;
 
 import java.util.ArrayList;
 

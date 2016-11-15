@@ -2,6 +2,15 @@ package com.example.ahmadaidin.imgfilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+
+import com.example.ahmadaidin.imgfilter.BinaryConverter.BinaryConverter;
+import com.example.ahmadaidin.imgfilter.Feature.Feature;
+import com.example.ahmadaidin.imgfilter.Feature.FeatureFinder;
+import com.example.ahmadaidin.imgfilter.Convolution.Convolution;
+import com.example.ahmadaidin.imgfilter.Convolution.MatrixOperator;
+import com.example.ahmadaidin.imgfilter.ObjectDetector.MyFaceDetector;
+import com.example.ahmadaidin.imgfilter.Skeletonize.ZhangSuenSkeletonizer;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -564,7 +573,9 @@ public class BitmapEditor{
     public void detectFace() {
         MyFaceDetector faceDetector = new MyFaceDetector(bitmap);
         faceDetector.detectFace();
+        this.bitmap = Bitmap.createBitmap(faceDetector.getBitmap());
         faceNum = faceDetector.getFaceNum();
+        ArrayList<ArrayList<Point>> faces = faceDetector.getFaces();
     }
 
     private  int toPositive(int a){
